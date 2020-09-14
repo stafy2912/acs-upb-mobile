@@ -1,6 +1,9 @@
+import 'package:acs_upb_mobile/authentication/service/auth_provider.dart';
 import 'package:acs_upb_mobile/generated/l10n.dart';
+import 'package:acs_upb_mobile/navigation/routes.dart';
 import 'package:acs_upb_mobile/widgets/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Utils {
@@ -14,5 +17,12 @@ class Utils {
         AppToast.show(S.of(context).errorCouldNotLaunchURL(url));
       }
     }
+  }
+
+  static Future<void> signOut(BuildContext context) async {
+    AuthenticationProvider authProvider =
+        Provider.of<AuthenticationProvider>(context, listen: false);
+    authProvider.signOut(context);
+    Navigator.pushReplacementNamed(context, Routes.login);
   }
 }

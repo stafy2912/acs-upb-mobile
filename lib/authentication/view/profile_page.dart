@@ -1,70 +1,23 @@
 import 'package:acs_upb_mobile/authentication/model/user.dart';
 import 'package:acs_upb_mobile/authentication/service/auth_provider.dart';
+import 'package:acs_upb_mobile/authentication/view/edit_profile_page.dart';
 import 'package:acs_upb_mobile/generated/l10n.dart';
-import 'package:acs_upb_mobile/navigation/routes.dart';
-import 'package:acs_upb_mobile/widgets/button.dart';
-import 'package:acs_upb_mobile/widgets/dialog.dart';
+import 'package:acs_upb_mobile/resources/storage_provider.dart';
+import 'package:acs_upb_mobile/resources/utils.dart';
 import 'package:acs_upb_mobile/widgets/icon_text.dart';
 import 'package:acs_upb_mobile/widgets/scaffold.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   ProfilePage({Key key}) : super(key: key);
 
-  Future<void> _signOut(BuildContext context) async {
-    AuthenticationProvider authProvider =
-        Provider.of<AuthenticationProvider>(context, listen: false);
-    authProvider.signOut(context);
-    Navigator.pushReplacementNamed(context, Routes.login);
-  }
+  @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
 
-  AppDialog _deletionConfirmationDialog(BuildContext context) => AppDialog(
-        icon: Icon(Icons.warning, color: Colors.red),
-        title: S.of(context).actionDeleteAccount,
-        message: S.of(context).messageDeleteAccount +
-            ' ' +
-            S.of(context).messageCannotBeUndone,
-        actions: [
-          AppButton(
-            key: ValueKey('delete_account_button'),
-            text: S.of(context).actionDeleteAccount.toUpperCase(),
-            color: Colors.red,
-            width: 130,
-            onTap: () async {
-              AuthenticationProvider authProvider =
-                  Provider.of<AuthenticationProvider>(context, listen: false);
-              bool res = await authProvider.delete(context: context);
-              if (res) {
-                _signOut(context);
-              }
-            },
-          )
-        ],
-      );
-
-  Widget _deleteAccountButton(BuildContext context) {
-    AuthenticationProvider authProvider = Provider.of<AuthenticationProvider>(context);
-
-    if (!authProvider.isAuthenticatedFromCache || authProvider.isAnonymous) {
-      return Container();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: IconText(
-          onTap: () async {
-            showDialog(context: context, builder: _deletionConfirmationDialog);
-          },
-          icon: Icons.delete,
-          text: S.of(context).actionDeleteAccount,
-          style: Theme.of(context)
-              .textTheme
-              .subtitle2
-              .apply(color: Colors.red, fontWeightDelta: 1)),
-    );
-  }
-
+class _ProfilePageState extends State<ProfilePage> {
   Widget _accountNotVerifiedFooter(BuildContext context) {
     AuthenticationProvider authProvider = Provider.of<AuthenticationProvider>(context);
 
@@ -99,8 +52,22 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AuthenticationProvider authProvider = Provider.of<AuthenticationProvider>(context);
-
+    StorageProvider storageProvider =
+        Provider.of<StorageProvider>(context, listen: true);
     return AppScaffold(
+      actions: [
+        AppScaffoldAction(
+            icon: Icons.edit,
+            onPressed: () {
+              AuthenticationProvider authProvider =
+                  Provider.of<AuthenticationProvider>(context, listen: false);
+              if (authProvider.isAuthenticatedFromCache &&
+                  !authProvider.isAnonymous) {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => EditProfilePage()));
+              }
+            })
+      ],
       title: S.of(context).navigationProfile,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -109,11 +76,15 @@ class ProfilePage extends StatelessWidget {
             builder: (BuildContext context, AsyncSnapshot<User> snap) {
               String userName;
               String userGroup;
+              String picturePath;
               if (snap.connectionState == ConnectionState.done) {
                 User user = snap.data;
                 if (user != null) {
                   userName = user.firstName + ' ' + user.lastName;
                   userGroup = user.group;
+                  picturePath = user.picture;
+                } else {
+                  picturePath = ' ';
                 }
                 return Column(
                   children: <Widget>[
@@ -121,11 +92,25 @@ class ProfilePage extends StatelessWidget {
                       flex: 1,
                       child: Container(),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Image(
-                          image: AssetImage(
-                              'assets/illustrations/undraw_profile_pic.png')),
+                    FutureBuilder<ImageProvider<dynamic>>(
+                      future: storageProvider.imageFromPath(picturePath),
+                      builder: (context,
+                          AsyncSnapshot<ImageProvider<dynamic>> snapshot) {
+                        var image;
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasData) {
+                            image = snapshot.data;
+                          } else {
+                            image = AssetImage(
+                                'assets/illustrations/undraw_profile_pic.png');
+                          }
+                        } else {
+                          image = AssetImage(
+                              'assets/illustrations/undraw_profile_pic.png');
+                        }
+
+                        return CircleAvatar(radius: 95, backgroundImage: image);
+                      },
                     ),
                     SizedBox(height: 8),
                     Text(
@@ -146,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                     SizedBox(height: 8),
                     InkWell(
                       onTap: () {
-                        _signOut(context);
+                        Utils.signOut(context);
                       },
                       child: Text(
                           authProvider.isAnonymous
@@ -161,7 +146,6 @@ class ProfilePage extends StatelessWidget {
                       flex: 3,
                       child: Container(),
                     ),
-                    _deleteAccountButton(context),
                     _accountNotVerifiedFooter(context),
                   ],
                 );

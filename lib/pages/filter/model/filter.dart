@@ -60,6 +60,30 @@ class Filter {
     return list;
   }
 
+  List<FilterNode> findNodeByPath(List<String> path){
+    List<FilterNode> result = [root];
+    if(path == null){
+      return result;
+    }
+    path.forEach((element) {
+      FilterNode aux = _findNodeByPathHelper(element, result.last);
+      if(aux == null){
+       return null;
+      }
+      result.add(aux);
+    });
+    return result;
+  }
+
+  FilterNode _findNodeByPathHelper(String nodeName, FilterNode parent){
+    for(int i = 0; i < parent.children.length; i++){
+      if(parent.children[i].name.compareTo(nodeName) == 0){
+        return parent.children[i];
+      }
+    }
+    return null;
+  }
+
   bool _relevantLeavesHelper(List<String> list, FilterNode node) {
     if (node.value) {
       bool hasSelectedChildren = false;

@@ -3,6 +3,7 @@ import 'package:acs_upb_mobile/generated/l10n.dart';
 import 'package:acs_upb_mobile/navigation/routes.dart';
 import 'package:acs_upb_mobile/pages/classes/model/class.dart';
 import 'package:acs_upb_mobile/pages/classes/view/class_view.dart';
+import 'package:acs_upb_mobile/pages/faq/faqPage.dart';
 import 'package:acs_upb_mobile/pages/portal/model/website.dart';
 import 'package:acs_upb_mobile/resources/locale_provider.dart';
 import 'package:acs_upb_mobile/resources/storage_provider.dart';
@@ -260,7 +261,10 @@ class HomePage extends StatelessWidget {
                         .copyWith(fontSize: 18),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return FaqPage();
+                    })),
                     child: Row(
                       children: <Widget>[
                         Text(
@@ -290,9 +294,9 @@ class HomePage extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
               ),
               ListTile(
-                title: Text('Cum citesc orarul?'),
+                title: Text('Care este programul la secretariat??'),
                 subtitle: Text(
-                  'În orar se regăsesc toate materiile care se pot face în anul respectiv. În general, acestea sunt descrise pe 4 tipuri de căsuțe...',
+                  'Secretariatul este deschis în timpul săptămânii între orele 9:00 si 11:00.',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

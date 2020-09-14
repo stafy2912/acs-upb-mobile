@@ -24,14 +24,14 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar>
   @override
   void initState() {
     super.initState();
+    tabController = TabController(vsync: this, length: 5);
     tabs = [
-      HomePage(key: PageStorageKey('Home')),
-      TimetablePage(),  // Cannot preserve state with PageStorageKey
+      HomePage(tabController: tabController, key: PageStorageKey('Home')),
+      TimetablePage(), // Cannot preserve state with PageStorageKey
       PortalPage(key: PageStorageKey('Portal')),
       ProfilePage(key: PageStorageKey('Profile')),
       PeoplePage(key: PageStorageKey('People')),
     ];
-    tabController = TabController(vsync: this, length: tabs.length);
   }
 
   @override

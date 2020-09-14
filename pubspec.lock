@@ -566,7 +566,7 @@ packages:
       name: resource
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.6"
+    version: "2.1.7"
   rrule:
     dependency: "direct main"
     description:
@@ -683,7 +683,7 @@ packages:
       name: time_machine
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.12"
+    version: "0.9.13"
   timetable:
     dependency: "direct main"
     description:

@@ -294,7 +294,7 @@ class HomePage extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
               ),
               ListTile(
-                title: Text('Care este programul la secretariat??'),
+                title: Text('Care este programul la secretariat?'),
                 subtitle: Text(
                   'Secretariatul este deschis în timpul săptămânii între orele 9:00 si 11:00.',
                   maxLines: 2,

@@ -1,4 +1,6 @@
+import 'package:acs_upb_mobile/authentication/model/user.dart';
 import 'package:acs_upb_mobile/authentication/service/auth_provider.dart';
+import 'package:acs_upb_mobile/authentication/view/edit_profile_page.dart';
 import 'package:acs_upb_mobile/generated/l10n.dart';
 import 'package:acs_upb_mobile/navigation/routes.dart';
 import 'package:acs_upb_mobile/pages/classes/model/class.dart';
@@ -9,6 +11,7 @@ import 'package:acs_upb_mobile/resources/locale_provider.dart';
 import 'package:acs_upb_mobile/resources/storage_provider.dart';
 import 'package:acs_upb_mobile/resources/utils.dart';
 import 'package:acs_upb_mobile/widgets/circle_image.dart';
+import 'package:acs_upb_mobile/widgets/icon_text.dart';
 import 'package:acs_upb_mobile/widgets/scaffold.dart';
 import 'package:black_hole_flutter/black_hole_flutter.dart';
 import 'package:flutter/material.dart';
@@ -32,10 +35,110 @@ class HomePage extends StatelessWidget {
       ],
       body: ListView(
         children: [
+          profileCard(context),
           favouriteWebsites(context),
           upcomingEvents(context),
           faq(context),
         ],
+      ),
+    );
+  }
+
+  Widget _accountNotVerifiedFooter(BuildContext context) {
+    AuthenticationProvider authProvider =
+        Provider.of<AuthenticationProvider>(context);
+
+    if (!authProvider.isAuthenticatedFromCache || authProvider.isAnonymous) {
+      return Container();
+    }
+
+    return FutureBuilder(
+      future: authProvider.isVerifiedFromService,
+      builder: (BuildContext context, AsyncSnapshot<bool> snap) {
+        if (!snap.hasData || snap.data) {
+          return Container();
+        }
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+          child: IconText(
+            align: TextAlign.center,
+            icon: Icons.error_outline,
+            text: S.of(context).messageEmailNotVerified,
+            actionText: S.of(context).actionSendVerificationAgain,
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(fontWeight: FontWeight.w400),
+            onTap: () => authProvider.sendEmailVerification(context: context),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget profileCard(BuildContext context) {
+    User user =
+        Provider.of<AuthenticationProvider>(context).currentUserFromCache;
+    var userName = user.firstName + ' ' + user.lastName;
+    var userGroup = user.group;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: CircleAvatar(
+                      radius: 40,
+                      child: Image(
+                          image: AssetImage(
+                              'assets/illustrations/undraw_profile_pic.png')),
+                    ),
+                  ),
+                  Expanded(
+                      child: Padding(
+                    padding: const EdgeInsets.only(left: 5.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          userName ?? S.of(context).stringAnonymous,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1
+                              .apply(fontWeightDelta: 2),
+                        ),
+                        if (userGroup != null)
+                          Column(
+                            children: [
+                              SizedBox(height: 4),
+                              Text(userGroup,
+                                  style: Theme.of(context).textTheme.subtitle1),
+                            ],
+                          ),
+                      ],
+                    ),
+                  )),
+                  IconButton(
+                    icon: Icon(Icons.edit),
+                    color: Theme.of(context).textTheme.button.color,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => EditProfilePage()),
+                    ),
+                  ),
+                ],
+              ),
+              _accountNotVerifiedFooter(context),
+            ],
+          ),
+        ),
       ),
     );
   }

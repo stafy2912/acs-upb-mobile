@@ -32,7 +32,7 @@ class _LoginViewState extends State<LoginView> {
       FormCardField(
         label: S.current.labelEmail,
         hint: S.current.hintEmail,
-        suffix: emailDomain,
+        // suffix: emailDomain,
         controller: emailController,
         autocorrect: false,
         autofillHints: [AutofillHints.username],
@@ -177,71 +177,92 @@ class _LoginViewState extends State<LoginView> {
             SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.only(left: 28, right: 28, bottom: 10),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height / 3,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            UniBanner(),
-                          ],
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Row(
+                    children: [
+                      Expanded(
+                        flex: responsiveFlexValue(constraints, 0, 3, 3, 3),
+                        child: Container(),
+                      ),
+                      Expanded(
+                        flex: responsiveFlexValue(constraints, 1, 9, 6, 3),
+                        child: IntrinsicHeight(
+                          child: Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height / 3,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: <Widget>[
+                                    UniBanner(),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Expanded(child: loginForm),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: AppButton(
+                                      key: const ValueKey(
+                                          'log_in_anonymously_button'),
+                                      text: S.current.actionLogInAnonymously,
+                                      onTap: () async {
+                                        final result = await authProvider
+                                            .signInAnonymously();
+                                        if (result) {
+                                          await Navigator.pushReplacementNamed(
+                                              context, Routes.home);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: AppButton(
+                                      key: const ValueKey('log_in_button'),
+                                      color: Theme.of(context).accentColor,
+                                      text: S.current.actionLogIn,
+                                      onTap: () => loginForm.submit(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text(
+                                    '${S.current.messageNewUser} ',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .subtitle1
+                                        .copyWith(fontWeight: FontWeight.w400),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                          context, Routes.signUp);
+                                    },
+                                    child: Text(S.current.actionSignUp,
+                                        style: Theme.of(context)
+                                            .accentTextTheme
+                                            .subtitle1
+                                            .copyWith(
+                                                fontWeight: FontWeight.w500)),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Expanded(child: loginForm),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Expanded(
-                            child: AppButton(
-                              key: const ValueKey('log_in_anonymously_button'),
-                              text: S.current.actionLogInAnonymously,
-                              onTap: () async {
-                                final result =
-                                    await authProvider.signInAnonymously();
-                                if (result) {
-                                  await Navigator.pushReplacementNamed(
-                                      context, Routes.home);
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: AppButton(
-                              key: const ValueKey('log_in_button'),
-                              color: Theme.of(context).accentColor,
-                              text: S.current.actionLogIn,
-                              onTap: () => loginForm.submit(),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            '${S.current.messageNewUser} ',
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1
-                                .copyWith(fontWeight: FontWeight.w400),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(context, Routes.signUp);
-                            },
-                            child: Text(S.current.actionSignUp,
-                                style: Theme.of(context)
-                                    .accentTextTheme
-                                    .subtitle1
-                                    .copyWith(fontWeight: FontWeight.w500)),
-                          ),
-                        ],
+                      Expanded(
+                        flex: responsiveFlexValue(constraints, 0, 3, 3, 3),
+                        child: Container(),
                       )
                     ],
                   ),
@@ -252,5 +273,24 @@ class _LoginViewState extends State<LoginView> {
         ),
       ),
     );
+  }
+
+  int responsiveFlexValue(BoxConstraints constraints, int small, int medium,
+      int large, int extraLarge) {
+    var width = constraints.maxWidth;
+
+    if (width <= 768) {
+      return small;
+    }
+
+    if (width <= 992) {
+      return medium;
+    }
+
+    if (width <= 1200) {
+      return large;
+    }
+
+    return extraLarge;
   }
 }
